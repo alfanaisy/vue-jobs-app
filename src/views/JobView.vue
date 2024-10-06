@@ -3,6 +3,7 @@ import { reactive, onMounted } from 'vue';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import axios from 'axios';
 import { useRoute, RouterLink } from 'vue-router';
+import BackButton from '@/components/BackButton.vue';
 
 const route = useRoute();
 
@@ -26,6 +27,7 @@ onMounted(async () => {
 </script>
 
 <template>
+  <BackButton />
   <section v-if="!state.isLoading" class="bg-green-50">
     <div class="container m-auto py-10 px-6">
       <div class="grid grid-cols-1 md:grid-cols-70/30 w-full gap-6">
@@ -38,9 +40,7 @@ onMounted(async () => {
             <div
               class="text-gray-500 mb-4 flex align-middle justify-center md:justify-start"
             >
-              <i
-                class="fa-solid fa-location-dot text-lg text-orange-700 mr-2"
-              ></i>
+              <i class="pi pi-map-marker text-lg text-orange-700 mr-2"></i>
               <p class="text-orange-700">{{ state.job.location }}</p>
             </div>
           </div>
