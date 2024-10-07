@@ -1,7 +1,7 @@
 <script setup>
 import router from '@/router';
-import axios from 'axios';
-import { reactive } from 'vue';
+import { axiosInstance } from '@/store/apiClient';
+import { onMounted, reactive } from 'vue';
 import { useToast } from 'vue-toastification';
 
 const form = reactive({
@@ -10,12 +10,11 @@ const form = reactive({
   description: '',
   salary: '',
   location: '',
-  company: {
-    name: '',
-    description: '',
-    contactEmail: '',
-    contactPhone: '',
-  },
+  company: '',
+});
+
+const companyData = reactive({
+  companies: [],
 });
 
 const toast = useToast();
@@ -27,16 +26,11 @@ const handleSubmit = async () => {
     location: form.location,
     description: form.description,
     salary: form.salary,
-    company: {
-      name: form.company.name,
-      description: form.company.description,
-      contactEmail: form.company.contactEmail,
-      contactPhone: form.company.contactPhone,
-    },
+    company: form.company,
   };
 
   try {
-    const response = await axios.post(`/api/jobs/`, newJob);
+    const response = await axiosInstance.post(`/jobs/records`, newJob);
     toast.success('Job added successfully');
     router.push(`/jobs/${response.data.id}`);
   } catch (error) {
@@ -44,6 +38,15 @@ const handleSubmit = async () => {
     toast.error('Job was not added');
   }
 };
+
+onMounted(async () => {
+  try {
+    const response = await axiosInstance.get('/companies/records');
+    companyData.companies = response.data.items;
+  } catch (error) {
+    console.error('Error fetching companies', error);
+  }
+});
 </script>
 
 <template>
@@ -53,8 +56,9 @@ const handleSubmit = async () => {
         class="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0"
       >
         <form @submit.prevent="handleSubmit">
+          <!-- JOB FORM -->
           <h2 class="text-3xl text-center font-semibold mb-6">Add Job</h2>
-
+          <!-- type -->
           <div class="mb-4">
             <label for="type" class="block text-gray-700 font-bold mb-2"
               >Job Type</label
@@ -72,7 +76,7 @@ const handleSubmit = async () => {
               <option value="Internship">Internship</option>
             </select>
           </div>
-
+          <!-- title -->
           <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2"
               >Job Listing Name</label
@@ -87,6 +91,7 @@ const handleSubmit = async () => {
               required
             />
           </div>
+          <!-- description -->
           <div class="mb-4">
             <label for="description" class="block text-gray-700 font-bold mb-2"
               >Description</label
@@ -100,7 +105,7 @@ const handleSubmit = async () => {
               placeholder="Add any job duties, expectations, requirements, etc"
             ></textarea>
           </div>
-
+          <!-- salary -->
           <div class="mb-4">
             <label for="type" class="block text-gray-700 font-bold mb-2"
               >Salary</label
@@ -125,7 +130,7 @@ const handleSubmit = async () => {
               <option value="Over $200K">Over $200K</option>
             </select>
           </div>
-
+          <!-- location -->
           <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2"> Location </label>
             <input
@@ -139,68 +144,28 @@ const handleSubmit = async () => {
             />
           </div>
 
+          <!-- COMPANY FORM -->
           <h3 class="text-2xl mb-5">Company Info</h3>
 
           <div class="mb-4">
             <label for="company" class="block text-gray-700 font-bold mb-2"
-              >Company Name</label
+              >Company</label
             >
-            <input
-              v-model="form.company.name"
-              type="text"
+            <select
+              v-model="form.company"
               id="company"
               name="company"
               class="border rounded w-full py-2 px-3"
-              placeholder="Company Name"
-            />
-          </div>
-
-          <div class="mb-4">
-            <label
-              for="company_description"
-              class="block text-gray-700 font-bold mb-2"
-              >Company Description</label
-            >
-            <textarea
-              v-model="form.company.description"
-              id="company_description"
-              name="company_description"
-              class="border rounded w-full py-2 px-3"
-              rows="4"
-              placeholder="What does your company do?"
-            ></textarea>
-          </div>
-
-          <div class="mb-4">
-            <label
-              for="contact_email"
-              class="block text-gray-700 font-bold mb-2"
-              >Contact Email</label
-            >
-            <input
-              v-model="form.company.contactEmail"
-              type="email"
-              id="contact_email"
-              name="contact_email"
-              class="border rounded w-full py-2 px-3"
-              placeholder="Email address for applicants"
               required
-            />
-          </div>
-          <div class="mb-4">
-            <label
-              for="contact_phone"
-              class="block text-gray-700 font-bold mb-2"
-              >Contact Phone</label
             >
-            <input
-              v-model="form.company.contactPhone"
-              type="tel"
-              id="contact_phone"
-              name="contact_phone"
-              class="border rounded w-full py-2 px-3"
-              placeholder="Optional phone for applicants"
-            />
+              <option value=""></option>
+              <option
+                v-for="company in companyData.companies"
+                :value="company.id"
+              >
+                {{ company.name }}
+              </option>
+            </select>
           </div>
 
           <div>
