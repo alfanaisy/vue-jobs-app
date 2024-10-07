@@ -4,6 +4,7 @@ import axios from 'axios';
 import { reactive, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import { useRoute } from 'vue-router';
+import { axiosInstance } from '@/store/apiClient';
 
 const route = useRoute();
 
@@ -15,17 +16,13 @@ const form = reactive({
   description: '',
   salary: '',
   location: '',
-  company: {
-    name: '',
-    description: '',
-    contactEmail: '',
-    contactPhone: '',
-  },
+  company: '',
 });
 
 const state = reactive({
   job: {},
   isLoading: true,
+  companies: [],
 });
 
 const toast = useToast();
@@ -37,16 +34,14 @@ const handleSubmit = async () => {
     location: form.location,
     description: form.description,
     salary: form.salary,
-    company: {
-      name: form.company.name,
-      description: form.company.description,
-      contactEmail: form.company.contactEmail,
-      contactPhone: form.company.contactPhone,
-    },
+    company: form.company,
   };
 
   try {
-    const response = await axios.put(`/api/jobs/${jobId}`, updatedJob);
+    const response = await axiosInstance.patch(
+      `/jobs/records/${jobId}`,
+      updatedJob
+    );
     toast.success('Job updated successfully');
     router.push(`/jobs/${response.data.id}`);
   } catch (error) {
@@ -57,7 +52,9 @@ const handleSubmit = async () => {
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`/api/jobs/${jobId}`);
+    const response = await axiosInstance.get(`/jobs/records/${jobId}`);
+    const companyResponse = await axiosInstance.get('/companies/records');
+    state.companies = companyResponse.data.items;
     state.job = response.data;
     // populate inputs
     form.type = state.job.type;
@@ -65,10 +62,7 @@ onMounted(async () => {
     form.description = state.job.description;
     form.salary = state.job.salary;
     form.location = state.job.location;
-    form.company.name = state.job.company.name;
-    form.company.description = state.job.company.description;
-    form.company.contactEmail = state.job.company.contactEmail;
-    form.company.contactPhone = state.job.company.contactPhone;
+    form.company = state.job.company;
   } catch (error) {
     console.error('Error fetching job', error);
   } finally {
@@ -174,64 +168,20 @@ onMounted(async () => {
 
           <div class="mb-4">
             <label for="company" class="block text-gray-700 font-bold mb-2"
-              >Company Name</label
+              >Company</label
             >
-            <input
-              v-model="form.company.name"
-              type="text"
+            <select
+              v-model="form.company"
               id="company"
               name="company"
               class="border rounded w-full py-2 px-3"
-              placeholder="Company Name"
-            />
-          </div>
-
-          <div class="mb-4">
-            <label
-              for="company_description"
-              class="block text-gray-700 font-bold mb-2"
-              >Company Description</label
-            >
-            <textarea
-              v-model="form.company.description"
-              id="company_description"
-              name="company_description"
-              class="border rounded w-full py-2 px-3"
-              rows="4"
-              placeholder="What does your company do?"
-            ></textarea>
-          </div>
-
-          <div class="mb-4">
-            <label
-              for="contact_email"
-              class="block text-gray-700 font-bold mb-2"
-              >Contact Email</label
-            >
-            <input
-              v-model="form.company.contactEmail"
-              type="email"
-              id="contact_email"
-              name="contact_email"
-              class="border rounded w-full py-2 px-3"
-              placeholder="Email address for applicants"
               required
-            />
-          </div>
-          <div class="mb-4">
-            <label
-              for="contact_phone"
-              class="block text-gray-700 font-bold mb-2"
-              >Contact Phone</label
             >
-            <input
-              v-model="form.company.contactPhone"
-              type="tel"
-              id="contact_phone"
-              name="contact_phone"
-              class="border rounded w-full py-2 px-3"
-              placeholder="Optional phone for applicants"
-            />
+              <option value=""></option>
+              <option v-for="company in state.companies" :value="company.id">
+                {{ company.name }}
+              </option>
+            </select>
           </div>
 
           <div>
