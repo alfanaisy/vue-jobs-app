@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { reactive } from 'vue';
 
 export const authStore = reactive({
@@ -11,3 +12,10 @@ export const authStore = reactive({
     localStorage.removeItem("token");
   }
 });
+
+export const axiosInstance = axios.create({
+  baseURL: '/api/collections',
+  headers: {
+    Authorization: `Bearer ${authStore.token}`
+  }
+})

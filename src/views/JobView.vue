@@ -1,6 +1,6 @@
 <script setup>
 import BackButton from '@/components/BackButton.vue';
-import { authStore } from '@/store/apiClient';
+import { authStore, axiosInstance } from '@/store/apiClient';
 import axios from 'axios';
 import { onMounted, reactive } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
@@ -36,20 +36,11 @@ const deleteJob = async () => {
 
 onMounted(async () => {
   try {
-    const authHeaderOptions = {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`,
-      },
-    };
-    const jobResponse = await axios.get(
-      `/api/collections/jobs/records/${jobId}`,
-      authHeaderOptions
-    );
+    const jobResponse = await axiosInstance.get(`/jobs/records/${jobId}`);
     state.job = jobResponse.data;
 
-    const companyResponse = await axios.get(
-      `/api/collections/companies/records/${state.job.company}`,
-      authHeaderOptions
+    const companyResponse = await axiosInstance.get(
+      `/companies/records/${state.job.company}`
     );
     state.company = companyResponse.data;
   } catch (error) {

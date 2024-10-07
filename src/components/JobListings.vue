@@ -1,10 +1,9 @@
 <script setup>
-import axios from 'axios';
 import { defineProps, onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import JobListing from './JobListing.vue';
-import { authStore } from '@/store/apiClient';
+import { authStore, axiosInstance } from '@/store/apiClient';
 
 defineProps({
   limit: Number,
@@ -21,13 +20,8 @@ const state = reactive({
 
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/collections/jobs/records', {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`,
-      },
-    });
+    const response = await axiosInstance.get('/jobs/records');
     state.jobs = response.data.items;
-    console.log(response);
   } catch (error) {
     console.error('Error fetching jobs', error);
   } finally {
