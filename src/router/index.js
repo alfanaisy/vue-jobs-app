@@ -6,6 +6,7 @@ import JobView from "@/views/JobView.vue";
 import NotFoundView from "@/views/NotFoundView.vue";
 import AddJobView from "@/views/AddJobView.vue";
 import EditJobView from "@/views/EditJobView.vue";
+import ErrorView from "@/views/ErrorView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,11 @@ const router = createRouter({
       path: '/:catchAll(.*)',
       name: 'not-found',
       component: NotFoundView
+    },
+    {
+      path: '/error',
+      name: 'error-page',
+      component: ErrorView
     }
   ]
 });

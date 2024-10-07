@@ -1,10 +1,10 @@
 import { reactive } from 'vue';
 
 export const authStore = reactive({
-  token: localStorage.getItem('token') || '',
+  token: JSON.parse(localStorage.getItem('token')) || '',
   setToken(newToken) {
     this.token = newToken;
-    localStorage.setItem("token", newToken);
+    localStorage.setItem("token", JSON.stringify(newToken));
   },
   clearToken() {
     this.token = "";
